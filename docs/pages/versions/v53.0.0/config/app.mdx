@@ -1,24 +1,291 @@
----
-title: app.json / app.config.js
-description: A reference of available properties in Expo app config.
-maxHeadingDepth: 5
----
+import React, { useState } from "react";
+import {
+  SafeAreaView,
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  FlatList,
+  Image,
+  StatusBar,
+  ScrollView,
+} from "react-native";
 
-import { BookOpen02Icon } from '@expo/styleguide-icons/outline/BookOpen02Icon';
+// Placeholder data
+const samplePosts = [
+  {
+    id: "1",
+    user: "Asha",
+    img: "https://picsum.photos/400/300",
+    text: "Darbhanga vibes ❤️",
+    likes: 45,
+  },
+  {
+    id: "2",
+    user: "Rahul",
+    img: "https://picsum.photos/400/301",
+    text: "Exploring Bihar culture ✨",
+    likes: 92,
+  },
+];
 
-import schema from '~/public/static/schemas/v53.0.0/app-config-schema.json';
-import AppConfigSchemaTable from '~/ui/components/AppConfigSchemaTable';
-import { BoxLink } from '~/ui/components/BoxLink';
+// Placeholder stories
+const sampleStories = [
+  { id: "s1", user: "Ravi", img: "https://picsum.photos/80/80" },
+  { id: "s2", user: "Sonia", img: "https://picsum.photos/81/81" },
+  { id: "s3", user: "Amit", img: "https://picsum.photos/82/82" },
+];
 
-The following is a list of properties that are available for you under the `"expo"` key in **app.json** or **app.config.json**. These properties can be passed to the top level object of **app.config.js** or **app.config.ts**.
+export default function App() {
+  const [active, setActive] = useState("Home"); // Home | Explore | Reels | DM | Profile
+  const [posts, setPosts] = useState(samplePosts);
 
-<BoxLink
-  title="Configuration with app config"
-  description="For information on app configuration, the differences between various app config files, and how to use them dynamically."
-  href="/workflow/configuration/"
-  Icon={BookOpen02Icon}
-/>
+  function likePost(id) {
+    setPosts(
+      posts.map((p) =>
+        p.id === id ? { ...p, likes: p.likes + 1 } : p
+      )
+    );
+  }
 
-## Properties
+  function renderPost({ item }) {
+    return (
+      <View
+        style={{
+          backgroundColor: "#fff",
+          borderRadius: 12,
+          marginBottom: 16,
+          elevation: 2,
+        }}
+      >
+        {/* Header */}
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            padding: 10,
+          }}
+        >
+          <View
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              backgroundColor: "#ddd",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Text style={{ fontWeight: "700" }}>
+              {item.user[0]}
+            </Text>
+          </View>
+          <Text style={{ marginLeft: 10, fontWeight: "600" }}>
+            {item.user}
+          </Text>
+        </View>
 
-<AppConfigSchemaTable schema={schema} />
+        {/* Image */}
+        <Image
+          source={{ uri: item.img }}
+          style={{ width: "100%", height: 250 }}
+        />
+
+        {/* Actions */}
+        <View
+          style={{
+            flexDirection: "row",
+            padding: 10,
+            gap: 15,
+          }}
+        >
+          <TouchableOpacity onPress={() => likePost(item.id)}>
+            <Text style={{ fontSize: 18 }}>❤️</Text>
+          </TouchableOpacity>
+          <Text style={{ fontSize: 18 }}>💬</Text>
+          <Text style={{ fontSize: 18 }}>📤</Text>
+        </View>
+
+        {/* Caption */}
+        <Text style={{ paddingHorizontal: 10, fontWeight: "600" }}>
+          {item.likes} likes
+        </Text>
+        <Text style={{ paddingHorizontal: 10, marginBottom: 10 }}>
+          <Text style={{ fontWeight: "700" }}>{item.user} </Text>
+          {item.text}
+        </Text>
+      </View>
+    );
+  }
+
+  return (
+    <SafeAreaView
+      style={{
+        flex: 1,
+        backgroundColor: "#f2f4f8",
+        paddingTop: StatusBar.currentHeight || 0,
+      }}
+    >
+      {/* Top bar */}
+      <View
+        style={{
+          height: 60,
+          backgroundColor: "#fff",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          paddingHorizontal: 12,
+          elevation: 2,
+        }}
+      >
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          <Image
+            source={{
+              uri: "https://i.ibb.co/NjR9WPC/darbhanga-fort-logo.png", // Fort logo placeholder
+            }}
+            style={{ width: 40, height: 40, borderRadius: 20 }}
+          />
+          <Text style={{ fontSize: 20, fontWeight: "700" }}>DBRGRAM</Text>
+        </View>
+        <Text style={{ color: "#666" }}>Prototype</Text>
+      </View>
+
+      {/* Body */}
+      <View style={{ flex: 1 }}>
+        {active === "Home" && (
+          <FlatList
+            ListHeaderComponent={
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={{ padding: 10 }}
+              >
+                {sampleStories.map((s) => (
+                  <View key={s.id} style={{ alignItems: "center", marginRight: 12 }}>
+                    <Image
+                      source={{ uri: s.img }}
+                      style={{
+                        width: 60,
+                        height: 60,
+                        borderRadius: 30,
+                        borderWidth: 2,
+                        borderColor: "purple",
+                      }}
+                    />
+                    <Text style={{ fontSize: 12 }}>{s.user}</Text>
+                  </View>
+                ))}
+              </ScrollView>
+            }
+            data={posts}
+            keyExtractor={(p) => p.id}
+            renderItem={renderPost}
+          />
+        )}
+
+        {active === "Explore" && (
+          <ScrollView contentContainerStyle={{ flexDirection: "row", flexWrap: "wrap" }}>
+            {[...Array(12)].map((_, i) => (
+              <Image
+                key={i}
+                source={{ uri: `https://picsum.photos/200/20${i}` }}
+                style={{
+                  width: "33%",
+                  height: 120,
+                }}
+              />
+            ))}
+          </ScrollView>
+        )}
+
+        {active === "Reels" && (
+          <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+            <Text style={{ fontSize: 18 }}>🎬 Reels Prototype</Text>
+          </View>
+        )}
+
+        {active === "DM" && (
+          <View style={{ padding: 12 }}>
+            <Text style={{ fontWeight: "700", marginBottom: 8 }}>Chats</Text>
+            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
+              <View
+                style={{ width: 46, height: 46, borderRadius: 23, backgroundColor: "#ddd" }}
+              />
+              <View style={{ marginLeft: 10 }}>
+                <Text style={{ fontWeight: "600" }}>Sonia</Text>
+                <Text style={{ color: "#666" }}>Hey! 👋</Text>
+              </View>
+            </View>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <View
+                style={{ width: 46, height: 46, borderRadius: 23, backgroundColor: "#ddd" }}
+              />
+              <View style={{ marginLeft: 10 }}>
+                <Text style={{ fontWeight: "600" }}>Vikram</Text>
+                <Text style={{ color: "#666" }}>Kya haal hai?</Text>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {active === "Profile" && (
+          <ScrollView>
+            <View style={{ alignItems: "center", padding: 20 }}>
+              <Image
+                source={{ uri: "https://picsum.photos/100" }}
+                style={{ width: 100, height: 100, borderRadius: 50 }}
+              />
+              <Text style={{ fontWeight: "700", fontSize: 18, marginTop: 8 }}>
+                You
+              </Text>
+              <Text style={{ color: "#666" }}>@dbr_user</Text>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-around",
+                  width: "100%",
+                  marginTop: 16,
+                }}
+              >
+                <Text>Posts: 10</Text>
+                <Text>Followers: 120</Text>
+                <Text>Following: 80</Text>
+              </View>
+            </View>
+            <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+              {[...Array(9)].map((_, i) => (
+                <Image
+                  key={i}
+                  source={{ uri: `https://picsum.photos/201/20${i}` }}
+                  style={{ width: "33%", height: 120 }}
+                />
+              ))}
+            </View>
+          </ScrollView>
+        )}
+      </View>
+
+      {/* Bottom Nav */}
+      <View
+        style={{
+          height: 64,
+          backgroundColor: "#fff",
+          flexDirection: "row",
+          justifyContent: "space-around",
+          alignItems: "center",
+          elevation: 6,
+        }}
+      >
+        {["Home", "Explore", "Reels", "DM", "Profile"].map((tab) => (
+          <TouchableOpacity
+            key={tab}
+            onPress={() => setActive(tab)}
+            style={{ alignItems: "center" }}
+          >
+            <Text style={{ fontWeight: active === tab ? "700" : "400" }}>{tab}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </SafeAreaView>
+  );
+}
